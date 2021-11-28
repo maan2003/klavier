@@ -4,7 +4,7 @@ mod event_handler;
 mod ext;
 mod min_keys;
 
-use std::{error::Error, mem};
+use std::{collections::VecDeque, error::Error, mem};
 mod all_keys;
 use evdev::Device;
 use event_handler::{keys, mod_or_key, remap, EventHandler};
@@ -59,16 +59,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut rules = rules();
     loop {
-        let mut evs: Vec<_> = dev.fetch_events()?.collect();
-        let mut next_evs = Vec::new();
+        let mut evs: VecDeque<_> = dev.fetch_events()?.collect();
         for rule in &mut rules {
-            for ev in evs.drain(..) {
+            for _ in 0..evs.len() {
+                let ev = evs.pop_front().unwrap();
                 let more_events = rule.handle_event(&ev)?;
-                next_evs.extend(more_events);
+                evs.extend(more_events);
             }
-            mem::swap(&mut evs, &mut next_evs);
         }
 
-        out.emit(&evs)?;
+        let slices = evs.as_slices();
+        out.emit(slices.0)?;
+        out.emit(slices.1)?;
     }
 }
