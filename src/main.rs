@@ -7,10 +7,9 @@ mod min_keys;
 use std::{collections::VecDeque, error::Error};
 mod all_keys;
 use evdev::Device;
-use rules::{keys, mod_or_key, remap, Rule};
+use rules::{keys, if_held, mod_or_key, remap, Rule};
 use min_keys::*;
 
-use crate::rules::if_held;
 
 const DEVICE_PATH: &str = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
 
