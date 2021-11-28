@@ -7,7 +7,7 @@ mod min_keys;
 use std::{collections::VecDeque, error::Error};
 mod all_keys;
 use evdev::Device;
-use rules::{keys, if_held, mod_or_key, remap, Rule};
+use rules::{keys, if_held, magic_shift, mod_or_key, remap, Rule};
 use min_keys::*;
 
 
@@ -42,6 +42,7 @@ fn rules() -> Vec<Box<dyn Rule>> {
 
     vec![
         remap(&src, &cmk),
+        magic_shift(),
         mod_or_key(CAPS, CAPS, F9),
         if_held(CAPS, ext),
     ]
