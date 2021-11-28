@@ -1,9 +1,10 @@
-use evdev::{uinput::VirtualDevice, InputEvent, Key};
-use std::{collections::HashMap, io};
+use evdev::{InputEvent, Key};
+use std::collections::HashMap;
+use std::io;
 
-use super::EventHandler;
+use super::Rule;
 
-pub struct Remaper {
+struct Remaper {
     // a map of keycode to keycode
     remap: HashMap<u16, u16>,
 }
@@ -20,7 +21,7 @@ pub macro remap($($src:ident => $dst:ident),* $(,)?) {{
     remap(&src, &dst)
 }}
 
-pub fn remap(src: &Map, dst: &Map) -> Box<dyn EventHandler> {
+pub fn remap(src: &Map, dst: &Map) -> Box<dyn Rule> {
     Box::new(Remaper {
         remap: src
             .iter()
@@ -30,7 +31,7 @@ pub fn remap(src: &Map, dst: &Map) -> Box<dyn EventHandler> {
     })
 }
 
-impl super::EventHandler for Remaper {
+impl Rule for Remaper {
     fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
         if let Some(&new_code) = self.remap.get(&event.code()) {
             let new_event = InputEvent::new(event.event_type(), new_code, event.value());

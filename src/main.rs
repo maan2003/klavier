@@ -1,20 +1,20 @@
 #![feature(decl_macro)]
 
-mod event_handler;
+mod rules;
 mod ext;
 mod min_keys;
 
-use std::{collections::VecDeque, error::Error, mem};
+use std::{collections::VecDeque, error::Error};
 mod all_keys;
 use evdev::Device;
-use event_handler::{keys, mod_or_key, remap, EventHandler};
+use rules::{keys, mod_or_key, remap, Rule};
 use min_keys::*;
 
-use crate::event_handler::if_held;
+use crate::rules::if_held;
 
 const DEVICE_PATH: &str = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
 
-fn rules() -> Vec<Box<dyn EventHandler>> {
+fn rules() -> Vec<Box<dyn Rule>> {
     let src = keys!(
         ESC    F1   F2   F3   F4   F5   F6   F7   F8   F9   F10   F11   F12
         GRAVE   N1    N2    N3    N4    N5    N6    N7    N8    N9    N0         MINUS   EQUAL    BS

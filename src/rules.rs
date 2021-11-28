@@ -1,11 +1,14 @@
+mod remaper;
+mod magic_shift;
+
 use crate::ext::*;
 use evdev::{InputEvent, Key};
 use std::io;
 
-mod remaper;
 pub use remaper::*;
+pub use magic_shift::*;
 
-pub trait EventHandler {
+pub trait Rule {
     // returns true if the event was handled
     fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>>;
 }
@@ -19,11 +22,11 @@ struct ModOrKey {
 
 pub struct IfHeld {
     key: Key,
-    rule: Box<dyn EventHandler>,
+    rule: Box<dyn Rule>,
     held: bool,
 }
 
-impl EventHandler for ModOrKey {
+impl Rule for ModOrKey {
     fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
         match event.key_event() {
             Some(KeyEvent::Press(key)) if key == self.real_key => Ok(vec![key_down(self.mod_key)]),
@@ -44,7 +47,7 @@ impl EventHandler for ModOrKey {
     }
 }
 
-impl EventHandler for IfHeld {
+impl Rule for IfHeld {
     fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
         match event.key_event() {
             Some(KeyEvent::Press(key)) if key == self.key => {
@@ -68,7 +71,7 @@ impl EventHandler for IfHeld {
     }
 }
 
-pub fn mod_or_key(real_key: Key, mod_key: Key, key: Key) -> Box<dyn EventHandler> {
+pub fn mod_or_key(real_key: Key, mod_key: Key, key: Key) -> Box<dyn Rule> {
     Box::new(ModOrKey {
         key,
         mod_key,
@@ -76,7 +79,7 @@ pub fn mod_or_key(real_key: Key, mod_key: Key, key: Key) -> Box<dyn EventHandler
         saw_other_key: false,
     })
 }
-pub fn if_held(key: Key, rule: Box<dyn EventHandler>) -> Box<dyn EventHandler> {
+pub fn if_held(key: Key, rule: Box<dyn Rule>) -> Box<dyn Rule> {
     Box::new(IfHeld {
         key,
         rule,
