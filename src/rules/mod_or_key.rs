@@ -22,8 +22,7 @@ impl Rule for ModOrKey {
             }
             Some(KeyEvent::Release(key)) if key == self.real_key => {
                 ctx.key_up(self.mod_key);
-                ctx.key_down(self.key);
-                ctx.key_up(self.key);
+                ctx.key_tap(self.key);
             }
             Some(KeyEvent::Release(_key)) => {
                 self.saw_other_key = true;
