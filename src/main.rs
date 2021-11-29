@@ -1,14 +1,15 @@
 #![feature(decl_macro)]
 
+mod all_keys;
 mod ext;
 mod min_keys;
 mod rules;
 
-use std::{collections::VecDeque, error::Error};
-mod all_keys;
 use evdev::Device;
+use std::{collections::VecDeque, error::Error};
+
 use min_keys::*;
-use rules::{if_held, keys, magic_shift, mod_or_key, remap, Rule};
+use rules::*;
 
 const DEVICE_PATH: &str = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
 
