@@ -4,6 +4,7 @@ _Remap all the keys!_
 
 ## Running
 
+0. Use Linux and Install Rust
 1. Edit `DEVICE_PATH` in `src/main.rs`
 1. Change `rules` in `src/main.rs` to your liking.
 1. `cargo build`
