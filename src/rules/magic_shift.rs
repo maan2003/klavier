@@ -27,7 +27,7 @@ enum ShiftState {
 }
 
 impl Rule for MagicShift {
-    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
+    fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match (&self.state, event.key_event()) {
             // shift is pressed
             (ShiftState::None, Some(KeyEvent::Press(key))) if key == LSHFT => {

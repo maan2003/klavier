@@ -13,7 +13,7 @@ struct IfHeld {
 }
 
 impl Rule for IfHeld {
-    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
+    fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match event.key_event() {
             Some(KeyEvent::Press(key)) if key == self.key => {
                 self.held = true;
@@ -25,7 +25,7 @@ impl Rule for IfHeld {
             Some(KeyEvent::Hold(key)) if key == self.key => {},
             _ => {
                 if self.held {
-                    self.rule.handle_event(ctx, event)?;
+                    self.rule.event(ctx, event)?;
                 } else {
                     ctx.forward(*event);
                 }

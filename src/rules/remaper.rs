@@ -32,7 +32,7 @@ pub fn remap(src: &Map, dst: &Map) -> Box<dyn Rule> {
 }
 
 impl Rule for Remaper {
-    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
+    fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         if let Some(&new_code) = self.remap.get(&event.code()) {
             let new_event = InputEvent::new(event.event_type(), new_code, event.value());
             ctx.forward(new_event);

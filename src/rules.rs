@@ -10,7 +10,7 @@ pub use {if_held::if_held, magic_shift::magic_shift, mod_or_key::mod_or_key, rem
 
 pub trait Rule {
     // returns true if the event was handled
-    fn handle_event(
+    fn event(
         &mut self,
         ctx: &mut RuleCtx,
         event: &InputEvent,

@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             for _ in 0..evs.len() {
                 let ev = evs.pop_front().unwrap();
                 let mut ctx = RuleCtx::new();
-                rule.handle_event(&mut ctx, &ev)?;
+                rule.event(&mut ctx, &ev)?;
                 evs.extend(ctx.events());
             }
         }

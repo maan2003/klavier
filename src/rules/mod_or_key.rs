@@ -14,7 +14,7 @@ struct ModOrKey {
 }
 
 impl Rule for ModOrKey {
-    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
+    fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match event.key_event() {
             Some(KeyEvent::Press(key)) if key == self.real_key => ctx.key_down(self.mod_key),
             Some(KeyEvent::Release(key)) if key == self.real_key && self.saw_other_key => {
