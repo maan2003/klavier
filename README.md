@@ -14,4 +14,4 @@ _Remap all the keys!_
 
 Rules are objects translating one input event to zero or more input events. 
 
-Most rules are defined in `src/rules.rs` and `src/rules/*.rs`
+Most rules are defined in `src/rules/*.rs`
