@@ -4,7 +4,7 @@ use evdev::{InputEvent, Key};
 
 use crate::ext::{KeyEvent, KeyEventExt};
 
-use super::Rule;
+use super::{Rule, RuleCtx};
 
 struct IfHeld {
     key: Key,
@@ -13,26 +13,25 @@ struct IfHeld {
 }
 
 impl Rule for IfHeld {
-    fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
+    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match event.key_event() {
             Some(KeyEvent::Press(key)) if key == self.key => {
                 self.held = true;
-                Ok(vec![])
             }
             Some(KeyEvent::Release(key)) if key == self.key => {
                 self.held = false;
-                Ok(vec![])
             }
             // ignore the holding of this key
-            Some(KeyEvent::Hold(key)) if key == self.key => Ok(vec![]),
+            Some(KeyEvent::Hold(key)) if key == self.key => {},
             _ => {
                 if self.held {
-                    self.rule.handle_event(event)
+                    self.rule.handle_event(ctx, event)?;
                 } else {
-                    Ok(vec![*event])
+                    ctx.forward(*event);
                 }
             }
         }
+        Ok(())
     }
 }
 

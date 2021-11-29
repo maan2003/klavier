@@ -2,9 +2,9 @@ use std::io;
 
 use evdev::{InputEvent, Key};
 
-use crate::ext::{key_down, key_up, KeyEvent, KeyEventExt};
+use crate::ext::{KeyEvent, KeyEventExt};
 
-use super::Rule;
+use super::{Rule, RuleCtx};
 
 struct ModOrKey {
     key: Key,
@@ -14,23 +14,26 @@ struct ModOrKey {
 }
 
 impl Rule for ModOrKey {
-    fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
+    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match event.key_event() {
-            Some(KeyEvent::Press(key)) if key == self.real_key => Ok(vec![key_down(self.mod_key)]),
+            Some(KeyEvent::Press(key)) if key == self.real_key => ctx.key_down(self.mod_key),
             Some(KeyEvent::Release(key)) if key == self.real_key && self.saw_other_key => {
-                Ok(vec![key_up(self.mod_key)])
+                ctx.key_up(self.mod_key);
             }
-            Some(KeyEvent::Release(key)) if key == self.real_key => Ok(vec![
-                key_up(self.mod_key),
-                key_down(self.key),
-                key_up(self.key),
-            ]),
+            Some(KeyEvent::Release(key)) if key == self.real_key => {
+                ctx.key_up(self.mod_key);
+                ctx.key_down(self.key);
+                ctx.key_up(self.key);
+            }
             Some(KeyEvent::Release(_key)) => {
                 self.saw_other_key = true;
-                Ok(vec![*event])
+                ctx.forward(*event);
             }
-            _ => Ok(vec![*event]),
+            _ => {
+                ctx.forward(*event);
+            }
         }
+        Ok(())
     }
 }
 

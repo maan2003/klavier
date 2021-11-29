@@ -1,5 +1,4 @@
-use evdev::{uinput::VirtualDevice, EventType, InputEvent, InputEventKind, Key};
-use std::io;
+use evdev::{InputEvent, InputEventKind, Key};
 
 pub enum KeyEvent {
     Press(Key),
@@ -9,14 +8,6 @@ pub enum KeyEvent {
 
 pub trait KeyEventExt {
     fn key_event(&self) -> Option<KeyEvent>;
-}
-
-pub fn key_down(key: Key) -> InputEvent {
-    InputEvent::new(EventType::KEY, key.code(), 1)
-}
-
-pub fn key_up(key: Key) -> InputEvent {
-    InputEvent::new(EventType::KEY, key.code(), 0)
 }
 
 impl KeyEventExt for InputEvent {

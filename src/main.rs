@@ -60,8 +60,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         for rule in &mut rules {
             for _ in 0..evs.len() {
                 let ev = evs.pop_front().unwrap();
-                let more_events = rule.handle_event(&ev)?;
-                evs.extend(more_events);
+                let mut ctx = RuleCtx::new();
+                rule.handle_event(&mut ctx, &ev)?;
+                evs.extend(ctx.events());
             }
         }
 

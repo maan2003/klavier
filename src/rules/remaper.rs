@@ -2,7 +2,7 @@ use evdev::{InputEvent, Key};
 use std::collections::HashMap;
 use std::io;
 
-use super::Rule;
+use super::{Rule, RuleCtx};
 
 struct Remaper {
     // a map of keycode to keycode
@@ -32,12 +32,13 @@ pub fn remap(src: &Map, dst: &Map) -> Box<dyn Rule> {
 }
 
 impl Rule for Remaper {
-    fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
+    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         if let Some(&new_code) = self.remap.get(&event.code()) {
             let new_event = InputEvent::new(event.event_type(), new_code, event.value());
-            Ok(vec![new_event])
+            ctx.forward(new_event);
         } else {
-            Ok(vec![*event])
+            ctx.forward(*event);
         }
+        Ok(())
     }
 }

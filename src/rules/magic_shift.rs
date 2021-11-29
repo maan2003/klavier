@@ -7,7 +7,7 @@ use crate::ext::*;
 use crate::min_keys::LSHFT;
 use evdev::InputEvent;
 
-use super::Rule;
+use super::{Rule, RuleCtx};
 
 // of course, shift + char works
 // single tap => enable shift for single character
@@ -27,24 +27,24 @@ enum ShiftState {
 }
 
 impl Rule for MagicShift {
-    fn handle_event(&mut self, event: &InputEvent) -> io::Result<Vec<InputEvent>> {
+    fn handle_event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match (&self.state, event.key_event()) {
             // shift is pressed
             (ShiftState::None, Some(KeyEvent::Press(key))) if key == LSHFT => {
                 self.state = ShiftState::Held(event.timestamp());
-                Ok(vec![*event])
+                ctx.forward(*event);
             }
             // case 1: normal shift use
             // a key released when shift is held
             (ShiftState::Held(_), Some(KeyEvent::Release(key))) if key != LSHFT => {
                 self.state = ShiftState::NormallyUsed;
-                Ok(vec![*event])
+                ctx.forward(*event);
             }
 
             // after normal use, shift is released
             (ShiftState::NormallyUsed, Some(KeyEvent::Release(key))) if key == LSHFT => {
                 self.state = ShiftState::None;
-                Ok(vec![*event])
+                ctx.forward(*event);
             }
 
             // case 2: single tap
@@ -57,14 +57,14 @@ impl Rule for MagicShift {
             {
                 self.state = ShiftState::SingleTaped;
                 // don't send the key event
-                Ok(vec![])
             }
 
             // other key is released after single tap
             (ShiftState::SingleTaped, Some(KeyEvent::Release(key))) if key != LSHFT => {
                 self.state = ShiftState::None;
+                ctx.forward(*event);
                 // now release shift
-                Ok(vec![*event, key_up(LSHFT)])
+                ctx.key_up(LSHFT);
             }
 
             // case 3: double tap
@@ -72,18 +72,18 @@ impl Rule for MagicShift {
             (ShiftState::SingleTaped, Some(KeyEvent::Release(key))) if key == LSHFT => {
                 self.state = ShiftState::DoubleTaped;
                 // don't send any event
-                Ok(vec![])
             }
 
             // on another shift release after double tap, disable the shift
             (ShiftState::DoubleTaped, Some(KeyEvent::Release(key))) if key == LSHFT => {
                 self.state = ShiftState::None;
                 // lets release the shift by sending this event
-                Ok(vec![*event])
+                ctx.forward(*event);
             }
 
-            _ => Ok(vec![*event]),
+            _ => ctx.forward(*event),
         }
+        Ok(())
     }
 }
 
