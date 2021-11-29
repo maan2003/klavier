@@ -55,17 +55,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     dev.grab()?;
 
     let mut rules = rules();
+
+    let mut evs = VecDeque::new();
     loop {
-        let mut evs: VecDeque<_> = dev.fetch_events()?.collect();
+        evs.extend(dev.fetch_events()?);
         for rule in &mut rules {
+            // pop first evs.len() event, new events will be added by RuleCtx
             for _ in 0..evs.len() {
                 let ev = evs.pop_front().unwrap();
-                let mut ctx = RuleCtx::new();
+                let mut ctx = RuleCtx::new(&mut evs);
                 rule.event(&mut ctx, &ev)?;
-                evs.extend(ctx.events());
             }
         }
 
+        // emit the events at the end
         let slices = evs.as_slices();
         out.emit(slices.0)?;
         out.emit(slices.1)?;

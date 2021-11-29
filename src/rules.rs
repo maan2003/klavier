@@ -4,31 +4,28 @@ mod mod_or_key;
 mod remaper;
 
 use evdev::{EventType, InputEvent, Key};
-use std::io;
+use std::{collections::VecDeque, io};
 
 pub use {if_held::if_held, magic_shift::magic_shift, mod_or_key::mod_or_key, remaper::*};
 
 pub trait Rule {
     // returns true if the event was handled
-    fn event(
-        &mut self,
-        ctx: &mut RuleCtx,
-        event: &InputEvent,
-    ) -> io::Result<()>;
+    fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()>;
 }
 
 #[derive(Debug)]
-pub struct RuleCtx {
-    events: Vec<InputEvent>,
+pub struct RuleCtx<'a> {
+    events: &'a mut VecDeque<InputEvent>,
 }
 
-impl RuleCtx {
-    pub fn new() -> Self {
-        Self { events: Vec::new() }
+impl<'a> RuleCtx<'a> {
+    /// We will only push_back in the queue
+    pub fn new(queue: &'a mut VecDeque<InputEvent>) -> Self {
+        Self { events: queue }
     }
 
     pub fn forward(&mut self, event: InputEvent) {
-        self.events.push(event);
+        self.events.push_back(event);
     }
 
     pub fn key_down(&mut self, key: Key) {
@@ -42,9 +39,5 @@ impl RuleCtx {
     pub fn key_tap(&mut self, key: Key) {
         self.key_down(key);
         self.key_up(key);
-    }
-
-    pub fn events(&self) -> &[InputEvent] {
-        &self.events
     }
 }
