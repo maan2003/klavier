@@ -2,11 +2,13 @@
 
 mod all_keys;
 mod ext;
+mod layer;
 mod min_keys;
 mod rules;
 
-use evdev::Device;
-use std::{collections::VecDeque, error::Error};
+use evdev::{uinput::VirtualDeviceBuilder, Device};
+use layer::Layer;
+use std::error::Error;
 
 use min_keys::*;
 use rules::*;
@@ -29,6 +31,9 @@ fn rules() -> Vec<Box<dyn Rule>> {
     );
 
     let ext = remap!(
+        S => LMETA,
+        T => LCTRL,
+        R => LSHFT,
         N => LEFT,
         U => UP,
         E => DOWN,
@@ -47,30 +52,15 @@ fn rules() -> Vec<Box<dyn Rule>> {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut dev = Device::open(DEVICE_PATH).unwrap();
-    let mut out = evdev::uinput::VirtualDeviceBuilder::new()?
+    let mut out = VirtualDeviceBuilder::new()?
         .name("MAIN")
         .with_keys(&all_keys::all_keys())?
         .build()?;
 
     dev.grab()?;
 
-    let mut rules = rules();
-
-    let mut evs = VecDeque::new();
+    let mut root_layer = Layer::new(rules());
     loop {
-        evs.extend(dev.fetch_events()?);
-        for rule in &mut rules {
-            // pop first evs.len() event, new events will be added by RuleCtx
-            for _ in 0..evs.len() {
-                let ev = evs.pop_front().unwrap();
-                let mut ctx = RuleCtx::new(&mut evs);
-                rule.event(&mut ctx, &ev)?;
-            }
-        }
-
-        // emit the events at the end
-        let slices = evs.as_slices();
-        out.emit(slices.0)?;
-        out.emit(slices.1)?;
+        root_layer.event_device(&mut dev, &mut out)?;
     }
 }

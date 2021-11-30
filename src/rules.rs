@@ -15,7 +15,7 @@ pub trait Rule {
 
 #[derive(Debug)]
 pub struct RuleCtx<'a> {
-    events: &'a mut VecDeque<InputEvent>,
+    pub(crate) events: &'a mut VecDeque<InputEvent>,
 }
 
 impl<'a> RuleCtx<'a> {
