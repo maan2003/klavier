@@ -15,7 +15,7 @@ pub macro keys($($key:ident)*) {
     vec![$($key),*]
 }
 
-pub macro remap($($src:ident => $dst:ident),* $(,)?) {{
+pub macro remap($($src:ident => $dst:ident)*) {{
     let src = keys! {$($src)*};
     let dst = keys! {$($dst)*};
     remap(&src, &dst)

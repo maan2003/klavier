@@ -31,15 +31,12 @@ fn rules() -> Vec<Box<dyn Rule>> {
         LCTRL   SUP  LALT            SPC                RALT  RCTRL
     );
 
-    let ext = remap!(
-        S => SUP,
-        T => LCTRL,
-        R => LSHT,
-        N => LEFT,
-        U => UP,
-        E => DOWN,
-        I => RIGHT,
-        O => BS,
+    let ext = remap!(                                                      U => UP
+        A => LALT   R => LSHT              T => LCTRL         N => LEFT   E => DOWN   I => RIGHT   O => BS
+    );
+
+    let ws_map = remap!(
+        N => F13   E => F14   I => F16   O => F17
     );
 
     vec![
@@ -47,7 +44,7 @@ fn rules() -> Vec<Box<dyn Rule>> {
         magic_shift(),
         mod_or_key(CAPS, CAPS, F9),
         mod_or_key(RALT, RALT, RET),
-        if_held(CAPS, [ext], []),
+        if_held(CAPS, [if_held(S, [ws_map], [ext])], []),
     ]
 }
 
