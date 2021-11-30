@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::ext::*;
-use crate::min_keys::LSHFT;
+use crate::keys::LSHT;
 use evdev::InputEvent;
 
 use super::{Rule, RuleCtx};
@@ -30,19 +30,19 @@ impl Rule for MagicShift {
     fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
         match (&self.state, event.key_event()) {
             // shift is pressed
-            (ShiftState::None, Some(KeyEvent::Press(key))) if key == LSHFT => {
+            (ShiftState::None, Some(KeyEvent::Press(key))) if key == LSHT => {
                 self.state = ShiftState::Held(event.timestamp());
                 ctx.forward(*event);
             }
             // case 1: normal shift use
             // a key released when shift is held
-            (ShiftState::Held(_), Some(KeyEvent::Release(key))) if key != LSHFT => {
+            (ShiftState::Held(_), Some(KeyEvent::Release(key))) if key != LSHT => {
                 self.state = ShiftState::NormallyUsed;
                 ctx.forward(*event);
             }
 
             // after normal use, shift is released
-            (ShiftState::NormallyUsed, Some(KeyEvent::Release(key))) if key == LSHFT => {
+            (ShiftState::NormallyUsed, Some(KeyEvent::Release(key))) if key == LSHT => {
                 self.state = ShiftState::None;
                 ctx.forward(*event);
             }
@@ -51,7 +51,7 @@ impl Rule for MagicShift {
             // shift was held, and was not used as a modifier
             // make sure shift is not held for more than 500ms
             (ShiftState::Held(time), Some(KeyEvent::Release(key)))
-                if key == LSHFT
+                if key == LSHT
                     && event.timestamp().duration_since(*time).unwrap()
                         < Duration::from_millis(500) =>
             {
@@ -60,22 +60,22 @@ impl Rule for MagicShift {
             }
 
             // other key is released after single tap
-            (ShiftState::SingleTaped, Some(KeyEvent::Release(key))) if key != LSHFT => {
+            (ShiftState::SingleTaped, Some(KeyEvent::Release(key))) if key != LSHT => {
                 self.state = ShiftState::None;
                 ctx.forward(*event);
                 // now release shift
-                ctx.key_up(LSHFT);
+                ctx.key_up(LSHT);
             }
 
             // case 3: double tap
             // after single tap, shift is released again with no other keys pressed
-            (ShiftState::SingleTaped, Some(KeyEvent::Release(key))) if key == LSHFT => {
+            (ShiftState::SingleTaped, Some(KeyEvent::Release(key))) if key == LSHT => {
                 self.state = ShiftState::DoubleTaped;
                 // don't send any event
             }
 
             // on another shift release after double tap, disable the shift
-            (ShiftState::DoubleTaped, Some(KeyEvent::Release(key))) if key == LSHFT => {
+            (ShiftState::DoubleTaped, Some(KeyEvent::Release(key))) if key == LSHT => {
                 self.state = ShiftState::None;
                 // lets release the shift by sending this event
                 ctx.forward(*event);
