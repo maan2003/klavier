@@ -10,6 +10,7 @@ use super::{Rule, RuleCtx};
 pub struct IfHeld {
     key: Key,
     then: Layer,
+    or: Layer,
     held: bool,
 }
 
@@ -28,7 +29,7 @@ impl Rule for IfHeld {
                 if self.held {
                     self.then.event(ctx, event)?;
                 } else {
-                    ctx.forward(*event);
+                    self.or.event(ctx, event)?;
                 }
             }
         }
@@ -36,10 +37,15 @@ impl Rule for IfHeld {
     }
 }
 
-pub fn if_held(key: Key, then: impl IntoIterator<Item = Box<dyn Rule>>) -> Box<dyn Rule> {
+pub fn if_held(
+    key: Key,
+    then: impl IntoIterator<Item = Box<dyn Rule>>,
+    or: impl IntoIterator<Item = Box<dyn Rule>>,
+) -> Box<dyn Rule> {
     Box::new(IfHeld {
         key,
         then: Layer::new(then.into_iter().collect()),
+        or: Layer::new(or.into_iter().collect()),
         held: false,
     })
 }

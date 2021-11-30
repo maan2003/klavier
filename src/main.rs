@@ -46,7 +46,7 @@ fn rules() -> Vec<Box<dyn Rule>> {
         magic_shift(),
         mod_or_key(CAPS, CAPS, F9),
         mod_or_key(RALT, RALT, ENTER),
-        if_held(CAPS, [ext]),
+        if_held(CAPS, [ext], []),
     ]
 }
 
