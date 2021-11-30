@@ -46,6 +46,7 @@ impl Layer {
         let slices = self.buf.as_slices();
         out.emit(slices.0)?;
         out.emit(slices.1)?;
+        self.buf.clear();
         Ok(())
     }
 }
