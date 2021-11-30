@@ -3,12 +3,13 @@ use std::io;
 use evdev::{InputEvent, Key};
 
 use crate::ext::{KeyEvent, KeyEventExt};
+use crate::layer::Layer;
 
 use super::{Rule, RuleCtx};
 
-struct IfHeld {
+pub struct IfHeld {
     key: Key,
-    rule: Box<dyn Rule>,
+    then: Layer,
     held: bool,
 }
 
@@ -22,10 +23,10 @@ impl Rule for IfHeld {
                 self.held = false;
             }
             // ignore the holding of this key
-            Some(KeyEvent::Hold(key)) if key == self.key => {},
+            Some(KeyEvent::Hold(key)) if key == self.key => {}
             _ => {
                 if self.held {
-                    self.rule.event(ctx, event)?;
+                    self.then.event(ctx, event)?;
                 } else {
                     ctx.forward(*event);
                 }
@@ -35,10 +36,10 @@ impl Rule for IfHeld {
     }
 }
 
-pub fn if_held(key: Key, rule: Box<dyn Rule>) -> Box<dyn Rule> {
+pub fn if_held(key: Key, then: impl IntoIterator<Item = Box<dyn Rule>>) -> Box<dyn Rule> {
     Box::new(IfHeld {
         key,
-        rule,
+        then: Layer::new(then.into_iter().collect()),
         held: false,
     })
 }
