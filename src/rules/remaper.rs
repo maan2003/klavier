@@ -42,3 +42,54 @@ impl Rule for Remaper {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::keys::*;
+    use crate::test_util::*;
+
+    use super::*;
+
+    test_case! {
+        other_keys_fail_thru
+        rule = remap!(
+            A => B
+            B => C
+        ),
+        input = (
+            down C
+            down D
+            hold C
+            up C
+            up D
+        ),
+        output = (
+            down C
+            down D
+            hold C
+            up C
+            up D
+        ),
+    }
+
+    test_case! {
+        remap_key
+        rule = remap!(
+            A => B
+        ),
+        input = (
+            down A
+            down B
+            hold A
+            up A
+            up B
+        ),
+        output = (
+            down B
+            down B
+            hold B
+            up B
+            up B
+        ),
+    }
+}
