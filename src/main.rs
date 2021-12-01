@@ -31,8 +31,8 @@ fn rules() -> Vec<Box<dyn Rule>> {
         LCTRL   SUP  LALT            SPC                RALT  RCTRL
     );
 
-    let ext = remap!(                                                      U => UP
-        A => LALT   R => LSHT              T => LCTRL         N => LEFT   E => DOWN   I => RIGHT   O => BS
+    let ext = remap!(                   U => UP
+        T => LCTRL         N => LEFT   E => DOWN   I => RIGHT   O => BS
     );
 
     let ws_map = remap!(
