@@ -18,6 +18,14 @@ pub macro events {
 
     (
         value = [{ $value: expr }]
+        input = [{ hold $key:ident $($rest:tt)* }]
+    ) => {
+        $value.push_back(key_event_to_input_event(KeyEvent::Hold($key)));
+        events!(value = [{ $value }] input = [{ $($rest)* }]);
+    },
+
+    (
+        value = [{ $value: expr }]
         input = [{ down $key:ident $($rest:tt)* }]
     ) => {
         $value.push_back(key_event_to_input_event(KeyEvent::Press($key)));
