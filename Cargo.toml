@@ -2,6 +2,7 @@
 name = "klavier"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 evdev = "0.11.1"
