@@ -5,6 +5,8 @@ mod ext;
 mod keys;
 mod layer;
 mod rules;
+#[cfg(test)]
+mod test_util;
 
 use evdev::uinput::VirtualDeviceBuilder;
 use evdev::{AttributeSet, Device};

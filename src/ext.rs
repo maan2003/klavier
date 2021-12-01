@@ -1,5 +1,6 @@
 use evdev::{InputEvent, InputEventKind, Key};
 
+#[derive(Debug)]
 pub enum KeyEvent {
     Press(Key),
     Hold(Key),
