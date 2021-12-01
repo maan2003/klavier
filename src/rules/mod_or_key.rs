@@ -44,3 +44,26 @@ pub fn mod_or_key(real_key: Key, mod_key: Key, key: Key) -> Box<dyn Rule> {
         saw_other_key: false,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::keys::*;
+    use crate::test_util::*;
+
+    test_case! {
+        single_tap
+        rule = mod_or_key(A, B, C),
+        input = (
+            down A
+            up A
+        ),
+        output = (
+            down B
+            up B
+            down C
+            up C
+        ),
+    }
+}
