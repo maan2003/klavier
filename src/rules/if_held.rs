@@ -2,7 +2,7 @@ use std::io;
 
 use evdev::{InputEvent, Key};
 
-use crate::ext::{KeyState, KeyEventExt};
+use crate::key_state::{KeyState, KeyEventExt};
 use crate::layer::Layer;
 
 use super::{Rule, RuleCtx};

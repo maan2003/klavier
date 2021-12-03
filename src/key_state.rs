@@ -15,9 +15,9 @@ pub trait KeyEventExt {
 impl KeyEventExt for InputEvent {
     fn key_state(&self) -> Option<KeyState> {
         match self.kind() {
-            InputEventKind::Key(key) if self.value() == 1 => Some(KeyState::Press),
-            InputEventKind::Key(key) if self.value() == 0 => Some(KeyState::Release),
-            InputEventKind::Key(key) if self.value() == 2 => Some(KeyState::Hold),
+            InputEventKind::Key(_) if self.value() == 1 => Some(KeyState::Press),
+            InputEventKind::Key(_) if self.value() == 0 => Some(KeyState::Release),
+            InputEventKind::Key(_) if self.value() == 2 => Some(KeyState::Hold),
             _ => None,
         }
     }
@@ -26,3 +26,4 @@ impl KeyEventExt for InputEvent {
         Key::new(self.code())
     }
 }
+

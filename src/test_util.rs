@@ -2,8 +2,8 @@ use evdev::Key;
 use evdev::{EventType, InputEvent};
 use std::collections::VecDeque;
 
-use crate::ext::KeyState;
-use crate::ext::KeyEventExt;
+use crate::key_state::KeyState;
+use crate::key_state::KeyEventExt;
 use crate::rules::Rule;
 use crate::rules::RuleCtx;
 use pretty_assertions::Comparison;

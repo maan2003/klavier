@@ -1,7 +1,7 @@
 // not really needed, just using for ease of use
 #![feature(decl_macro)]
 
-mod ext;
+mod key_state;
 mod keys;
 mod layer;
 mod rules;

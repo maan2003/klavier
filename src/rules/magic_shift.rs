@@ -3,7 +3,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use crate::ext::*;
+use crate::key_state::*;
 use crate::keys::LSHT;
 use evdev::InputEvent;
 
