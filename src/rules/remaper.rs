@@ -2,11 +2,13 @@ use evdev::{InputEvent, Key};
 use std::collections::HashMap;
 use std::io;
 
+use crate::{emit_event::EmitEvent, key_state::KeyEventExt};
+
 use super::{Rule, RuleCtx};
 
-struct Remaper {
+pub struct Remaper<E> {
     // a map of keycode to keycode
-    remap: HashMap<u16, u16>,
+    remap: HashMap<u16, E>,
 }
 
 pub type Map = Vec<Key>;
@@ -15,10 +17,13 @@ pub macro keys($($key:ident)*) {
     vec![$($key),*]
 }
 
-pub macro remap($($src:ident => $dst:ident)*) {{
-    let src = keys! {$($src)*};
-    let dst = keys! {$($dst)*};
-    remap(&src, &dst)
+pub macro remap($($src:ident => $dst:expr)*) {{
+    let src = keys![$($src)*];
+    let dst = vec![$(Box::new($dst) as Box<dyn EmitEvent>),*];
+
+    Box::new(Remaper {
+        remap: src.into_iter().map(|x| x.code()).zip(dst.into_iter()).collect(),
+    }) as Box<dyn Rule>
 }}
 
 pub fn remap(src: &Map, dst: &Map) -> Box<dyn Rule> {
@@ -26,16 +31,16 @@ pub fn remap(src: &Map, dst: &Map) -> Box<dyn Rule> {
         remap: src
             .iter()
             .zip(dst.iter())
-            .map(|(s, d)| (s.code(), d.code()))
+            .map(|(s, d)| (s.code(), *d))
             .collect(),
     })
 }
 
-impl Rule for Remaper {
+impl<E: EmitEvent> Rule for Remaper<E> {
     fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
-        if let Some(&new_code) = self.remap.get(&event.code()) {
-            let new_event = InputEvent::new(event.event_type(), new_code, event.value());
-            ctx.forward(new_event);
+        if let Some(em) = self.remap.get(&event.code()) {
+            let state = event.key_state().unwrap();
+            em.emit(ctx, state);
         } else {
             ctx.forward(*event);
         }

@@ -5,6 +5,8 @@ mod key_state;
 mod keys;
 mod layer;
 mod rules;
+mod emit_event;
+
 #[cfg(test)]
 mod test_util;
 
