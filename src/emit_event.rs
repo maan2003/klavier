@@ -51,7 +51,7 @@ where
     E: EmitEvent,
 {
     fn emit(&self, ctx: &mut RuleCtx, state: KeyState) {
-        ctx.key_hold(self.mod_.0);
+        ctx.key_down(self.mod_.0);
         self.inner.emit(ctx, state);
         ctx.key_up(self.mod_.0);
     }
