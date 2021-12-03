@@ -2,7 +2,7 @@ use std::io;
 
 use evdev::{InputEvent, Key};
 
-use crate::ext::{KeyEvent, KeyEventExt};
+use crate::ext::{KeyState, KeyEventExt};
 use crate::layer::Layer;
 
 use super::{Rule, RuleCtx};
@@ -16,15 +16,16 @@ pub struct IfHeld {
 
 impl Rule for IfHeld {
     fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
-        match event.key_event() {
-            Some(KeyEvent::Press(key)) if key == self.key => {
+        let key = event.key();
+        match event.key_state() {
+            Some(KeyState::Press) if key == self.key => {
                 self.held = true;
             }
-            Some(KeyEvent::Release(key)) if key == self.key => {
+            Some(KeyState::Release) if key == self.key => {
                 self.held = false;
             }
             // ignore the holding of this key
-            Some(KeyEvent::Hold(key)) if key == self.key => {}
+            Some(KeyState::Hold) if key == self.key => {}
             _ => {
                 if self.held {
                     self.then.event(ctx, event)?;

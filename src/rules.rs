@@ -36,6 +36,10 @@ impl<'a> RuleCtx<'a> {
         self.forward(InputEvent::new(EventType::KEY, key.code(), 0));
     }
 
+    pub fn key_hold(&mut self, key: Key) {
+        self.forward(InputEvent::new(EventType::KEY, key.code(), 2));
+    }
+
     pub fn key_tap(&mut self, key: Key) {
         self.key_down(key);
         self.key_up(key);

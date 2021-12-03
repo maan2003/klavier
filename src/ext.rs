@@ -1,23 +1,28 @@
 use evdev::{InputEvent, InputEventKind, Key};
 
 #[derive(Debug)]
-pub enum KeyEvent {
-    Press(Key),
-    Hold(Key),
-    Release(Key),
+pub enum KeyState {
+    Press,
+    Release,
+    Hold,
 }
 
 pub trait KeyEventExt {
-    fn key_event(&self) -> Option<KeyEvent>;
+    fn key_state(&self) -> Option<KeyState>;
+    fn key(&self) -> Key;
 }
 
 impl KeyEventExt for InputEvent {
-    fn key_event(&self) -> Option<KeyEvent> {
+    fn key_state(&self) -> Option<KeyState> {
         match self.kind() {
-            InputEventKind::Key(key) if self.value() == 1 => Some(KeyEvent::Press(key)),
-            InputEventKind::Key(key) if self.value() == 0 => Some(KeyEvent::Release(key)),
-            InputEventKind::Key(key) if self.value() == 2 => Some(KeyEvent::Hold(key)),
+            InputEventKind::Key(key) if self.value() == 1 => Some(KeyState::Press),
+            InputEventKind::Key(key) if self.value() == 0 => Some(KeyState::Release),
+            InputEventKind::Key(key) if self.value() == 2 => Some(KeyState::Hold),
             _ => None,
         }
+    }
+
+    fn key(&self) -> Key {
+        Key::new(self.code())
     }
 }

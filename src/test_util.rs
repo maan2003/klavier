@@ -1,7 +1,8 @@
+use evdev::Key;
 use evdev::{EventType, InputEvent};
 use std::collections::VecDeque;
 
-use crate::ext::KeyEvent;
+use crate::ext::KeyState;
 use crate::ext::KeyEventExt;
 use crate::rules::Rule;
 use crate::rules::RuleCtx;
@@ -12,7 +13,7 @@ pub macro events {
         value = [{ $value: expr }]
         input = [{ up $key:ident $($rest:tt)* }]
     ) => {
-        $value.push_back(key_event_to_input_event(KeyEvent::Release($key)));
+        $value.push_back(key_event_to_input_event(KeyState::Release, $key));
         events!(value = [{ $value }] input = [{ $($rest)* }]);
     },
 
@@ -20,7 +21,7 @@ pub macro events {
         value = [{ $value: expr }]
         input = [{ hold $key:ident $($rest:tt)* }]
     ) => {
-        $value.push_back(key_event_to_input_event(KeyEvent::Hold($key)));
+        $value.push_back(key_event_to_input_event(KeyState::Hold, $key));
         events!(value = [{ $value }] input = [{ $($rest)* }]);
     },
 
@@ -28,16 +29,7 @@ pub macro events {
         value = [{ $value: expr }]
         input = [{ down $key:ident $($rest:tt)* }]
     ) => {
-        $value.push_back(key_event_to_input_event(KeyEvent::Press($key)));
-        events!(value = [{ $value }] input = [{ $($rest)* }]);
-    },
-
-    (
-        value = [{ $value: expr }]
-        input = [{ $key:ident $($rest:tt)* }]
-    ) => {
-        $value.push_back(key_event_to_input_event(KeyEvent::Press($key)));
-        $value.push_back(key_event_to_input_event(KeyEvent::Release($key)));
+        $value.push_back(key_event_to_input_event(KeyState::Press, $key));
         events!(value = [{ $value }] input = [{ $($rest)* }]);
     },
 
@@ -53,11 +45,11 @@ pub macro events {
     }}
 }
 
-pub fn key_event_to_input_event(ev: KeyEvent) -> InputEvent {
+pub fn key_event_to_input_event(ev: KeyState, key: Key) -> InputEvent {
     match ev {
-        KeyEvent::Press(key) => InputEvent::new(EventType::KEY, key.code(), 1),
-        KeyEvent::Hold(key) => InputEvent::new(EventType::KEY, key.code(), 2),
-        KeyEvent::Release(key) => InputEvent::new(EventType::KEY, key.code(), 0),
+        KeyState::Press => InputEvent::new(EventType::KEY, key.code(), 1),
+        KeyState::Hold => InputEvent::new(EventType::KEY, key.code(), 2),
+        KeyState::Release => InputEvent::new(EventType::KEY, key.code(), 0),
     }
 }
 
@@ -91,10 +83,11 @@ pub struct Printer<'a>(pub &'a VecDeque<InputEvent>);
 impl std::fmt::Debug for Printer<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for event in self.0.iter() {
-            match event.key_event().unwrap() {
-                KeyEvent::Press(key) => writeln!(f, "Down {:?}", key)?,
-                KeyEvent::Release(key) => writeln!(f, "Up {:?}", key)?,
-                KeyEvent::Hold(key) => writeln!(f, "Hold {:?}", key)?,
+            let key = event.key();
+            match event.key_state().unwrap() {
+                KeyState::Press => writeln!(f, "Down {:?}", key)?,
+                KeyState::Release => writeln!(f, "Up {:?}", key)?,
+                KeyState::Hold => writeln!(f, "Hold {:?}", key)?,
             }
         }
         Ok(())

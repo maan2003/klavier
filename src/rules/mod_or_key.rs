@@ -2,7 +2,7 @@ use std::io;
 
 use evdev::{InputEvent, Key};
 
-use crate::ext::{KeyEvent, KeyEventExt};
+use crate::ext::{KeyState, KeyEventExt};
 
 use super::{Rule, RuleCtx};
 
@@ -15,17 +15,18 @@ struct ModOrKey {
 
 impl Rule for ModOrKey {
     fn event(&mut self, ctx: &mut RuleCtx, event: &InputEvent) -> io::Result<()> {
-        match event.key_event() {
-            Some(KeyEvent::Press(key)) if key == self.real_key => ctx.key_down(self.mod_key),
-            Some(KeyEvent::Release(key)) if key == self.real_key => {
+        let key = event.key();
+        match event.key_state() {
+            Some(KeyState::Press) if key == self.real_key => ctx.key_down(self.mod_key),
+            Some(KeyState::Release) if key == self.real_key => {
                 ctx.key_up(self.mod_key);
                 if !self.saw_other_key {
                     ctx.key_tap(self.key);
                 }
                 self.saw_other_key = false;
             }
-            Some(KeyEvent::Hold(key)) if key == self.real_key => {}
-            Some(KeyEvent::Release(_key)) => {
+            Some(KeyState::Hold) if key == self.real_key => {}
+            Some(KeyState::Release) => {
                 self.saw_other_key = true;
                 ctx.forward(*event);
             }
