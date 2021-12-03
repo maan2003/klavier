@@ -11,7 +11,7 @@ pub struct Remaper<E> {
     remap: HashMap<u16, E>,
 }
 
-pub type Map = Vec<Key>;
+pub type Map<E> = Vec<E>;
 
 pub macro keys($($key:ident)*) {
     vec![$($key),*]
@@ -21,17 +21,15 @@ pub macro remap($($src:ident => $dst:expr)*) {{
     let src = keys![$($src)*];
     let dst = vec![$(Box::new($dst) as Box<dyn EmitEvent>),*];
 
-    Box::new(Remaper {
-        remap: src.into_iter().map(|x| x.code()).zip(dst.into_iter()).collect(),
-    }) as Box<dyn Rule>
+    remap(&src, dst)
 }}
 
-pub fn remap(src: &Map, dst: &Map) -> Box<dyn Rule> {
+pub fn remap<E: EmitEvent + 'static>(src: &Map<Key>, dst: Map<E>) -> Box<dyn Rule> {
     Box::new(Remaper {
         remap: src
             .iter()
-            .zip(dst.iter())
-            .map(|(s, d)| (s.code(), *d))
+            .zip(dst.into_iter())
+            .map(|(s, d)| (s.code(), d))
             .collect(),
     })
 }
