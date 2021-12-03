@@ -1,11 +1,11 @@
 // not really needed, just using for ease of use
 #![feature(decl_macro)]
 
+mod emit_event;
 mod key_state;
 mod keys;
 mod layer;
 mod rules;
-mod emit_event;
 
 #[cfg(test)]
 mod test_util;
@@ -17,6 +17,8 @@ use std::error::Error;
 
 use keys::*;
 use rules::*;
+
+use crate::emit_event::SHIFT;
 
 const DEVICE_PATH: &str = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
 
@@ -40,7 +42,43 @@ fn rules() -> Vec<Box<dyn Rule>> {
     );
 
     let ws_map = remap!(
-        N => F13   E => F14   I => F16   O => F17
+        N => F13   E => F14   I => F15   O => F16
+    );
+
+    let syms = remap!(
+        // left side
+        A => SHIFT + COMA     // <
+        Q => SHIFT + DOT      // >
+        R => LBRACE           // [
+        W => RBRACE           // ]
+        S => SHIFT + LBRACE   // {
+        F => SHIFT + RBRACE   // }
+        T => SHIFT + N9       // (
+        P => SHIFT + N0       // )
+        // puncts
+        G => SQT              // '
+        V => SHIFT + SQT      // "
+        D => SHIFT + N7       // &
+        C => SHIFT + BLSH     // |
+
+        // top right
+        J => SHIFT + EQUAL    // +
+        L => GRV              // `
+        U => SHIFT + SLSH     // ?
+        Y => SHIFT + N1       // !
+        SMCLN => SHIFT + N4   // $
+
+        // home right
+        M => MINUS
+        N => SHIFT + SMCLN    // -
+        E => COMA
+        I => DOT
+        O => SHIFT + MINUS    // _
+
+        // bottom right
+        K => SHIFT + N8       // *
+        H => EQUAL
+        Z => SLSH
     );
 
     vec![
@@ -49,6 +87,7 @@ fn rules() -> Vec<Box<dyn Rule>> {
         mod_or_key(CAPS, CAPS, F9),
         mod_or_key(RALT, RALT, RET),
         if_held(CAPS, [if_held(S, [ws_map], [ext])], []),
+        if_held(RALT, [syms], []),
     ]
 }
 
