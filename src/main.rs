@@ -1,24 +1,5 @@
-// not really needed, just using for ease of use
-#![feature(decl_macro)]
-
-mod emit_event;
-mod key_state;
-mod keys;
-mod layer;
-mod rules;
-
-#[cfg(test)]
-mod test_util;
-
-use evdev::uinput::VirtualDeviceBuilder;
-use evdev::{AttributeSet, Device};
-use layer::Layer;
+use klavier::{keys::*, mods::*, rules::*, Remaper};
 use std::error::Error;
-
-use keys::*;
-use rules::*;
-
-use crate::emit_event::SHIFT;
 
 const DEVICE_PATH: &str = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
 
@@ -92,21 +73,6 @@ fn rules() -> Vec<Box<dyn Rule>> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut dev = Device::open(DEVICE_PATH).unwrap();
-    let mut all_keys = AttributeSet::new();
-    for key in ALL_KEYS {
-        all_keys.insert(*key);
-    }
-
-    let mut out = VirtualDeviceBuilder::new()?
-        .name("MAIN")
-        .with_keys(&all_keys)?
-        .build()?;
-
-    dev.grab()?;
-
-    let mut root_layer = Layer::new(rules());
-    loop {
-        root_layer.event_device(&mut dev, &mut out)?;
-    }
+    Remaper::new(DEVICE_PATH).rules(rules())
+        .run()
 }
