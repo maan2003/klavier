@@ -108,4 +108,7 @@ def_keys! {
     RIGHT => KEY_RIGHT,
     UP => KEY_UP,
     DOWN => KEY_DOWN,
+
+    KPMINUS => KEY_KPMINUS,
+    KPSTAR => KEY_KPASTERISK,
 }

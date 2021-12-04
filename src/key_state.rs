@@ -1,6 +1,6 @@
 use evdev::{InputEvent, InputEventKind, Key};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum KeyState {
     Press,
     Release,

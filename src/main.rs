@@ -69,6 +69,7 @@ fn rules() -> Vec<Box<dyn Rule>> {
         mod_or_key(RALT, RALT, RET),
         if_held(CAPS, [if_held(S, [ws_map], [ext])], []),
         if_held(RALT, [syms], []),
+        rr_macro(KPSTAR, KPMINUS),
     ]
 }
 
