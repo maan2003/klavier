@@ -65,7 +65,6 @@ fn rules() -> Vec<Box<dyn Rule>> {
 
     vec![
         remap(&src, cmk),
-        magic_shift(),
         mod_or_key(CAPS, CAPS, F9),
         mod_or_key(RALT, RALT, RET),
         if_held(CAPS, [if_held(S, [ws_map], [ext])], []),
