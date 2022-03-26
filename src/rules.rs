@@ -1,16 +1,13 @@
 mod if_held;
-mod macros;
 mod magic_shift;
 mod mod_or_key;
 mod remaper;
+mod macros;
 
 use evdev::{EventType, InputEvent, Key};
 use std::{collections::VecDeque, io};
 
-pub use {
-    if_held::if_held, macros::rr_macro, magic_shift::magic_shift, mod_or_key::mod_or_key,
-    remaper::*,
-};
+pub use {if_held::if_held, magic_shift::magic_shift, mod_or_key::mod_or_key, remaper::*, macros::rr_macro};
 
 pub trait Rule {
     // returns true if the event was handled

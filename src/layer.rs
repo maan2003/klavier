@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, time::Instant};
 use std::io;
 
 use evdev::{uinput::VirtualDevice, Device, InputEvent};
